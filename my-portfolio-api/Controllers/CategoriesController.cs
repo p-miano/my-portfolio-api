@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using my_portfolio_api.Data;
 using my_portfolio_api.Models;
 
@@ -15,8 +16,8 @@ public class CategoriesController : ControllerBase
         _context = context;
     }
 
+    // Route: GET /api/categories
     [HttpGet]
-    [Route("api/categories")]
     public IActionResult GetCategories()
     {
         var categories = _context.Categories.Select(c => new
@@ -28,7 +29,7 @@ public class CategoriesController : ControllerBase
         return Ok(categories);
     }
 
-
+    // Route: GET /api/categories/{id}
     [HttpGet("{id}")]
     public IActionResult GetCategory(int id)
     {
@@ -41,6 +42,7 @@ public class CategoriesController : ControllerBase
         return Ok(category);
     }
 
+    // Route: POST /api/categories
     [HttpPost]
     public IActionResult CreateCategory(Category category)
     {
@@ -50,13 +52,14 @@ public class CategoriesController : ControllerBase
         return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
     }
 
+    // Route: PUT /api/categories/{id}
     [HttpPut("{id}")]
-    public IActionResult UpdateCategory(int id, Category updatedCategory)
+    public IActionResult UpdateCategory(int id, [FromBody] Category updatedCategory)
     {
         var category = _context.Categories.Find(id);
         if (category == null)
         {
-            return NotFound();
+            return NotFound("Category not found.");
         }
 
         category.Name = updatedCategory.Name;
@@ -65,13 +68,22 @@ public class CategoriesController : ControllerBase
         return NoContent();
     }
 
+    // Route: DELETE /api/categories/{id}
     [HttpDelete("{id}")]
     public IActionResult DeleteCategory(int id)
     {
-        var category = _context.Categories.Find(id);
+        var category = _context.Categories
+            .Include(c => c.Projects) // Include associated projects
+            .FirstOrDefault(c => c.Id == id);
+
         if (category == null)
         {
-            return NotFound();
+            return NotFound("Category not found.");
+        }
+
+        if (category.Projects.Any()) // Check if any projects are associated
+        {
+            return BadRequest("Cannot delete category because it has associated projects.");
         }
 
         _context.Categories.Remove(category);
@@ -79,4 +91,6 @@ public class CategoriesController : ControllerBase
 
         return NoContent();
     }
+
+
 }

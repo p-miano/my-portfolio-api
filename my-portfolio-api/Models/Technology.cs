@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace my_portfolio_api.Models;
 
@@ -15,9 +16,11 @@ public class Technology
     public int TechnologyGroupId { get; set; }
 
     // Navigation Property for TechnologyGroup
-    [Required]
+    [Required]    
+    [JsonIgnore] // Avoid serializing TechnologyGroup to prevent cycles
     public TechnologyGroup TechnologyGroup { get; set; }
 
     // Navigation Property for ProjectTechnologies
+    [JsonIgnore]
     public ICollection<ProjectTechnology> ProjectTechnologies { get; set; }
 }

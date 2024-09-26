@@ -19,13 +19,13 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet]
-    [HttpGet]
     public IActionResult GetProjects()
     {
         var projects = _context.Projects
-            .Include(p => p.Category) // Include Category for reference
+            .Include(p => p.Category) // Eagerly load Category
             .Include(p => p.ProjectTechnologies)
-            .ThenInclude(pt => pt.Technology) // Include Technologies
+            .ThenInclude(pt => pt.Technology) // Eagerly load Technology
+            .ThenInclude(t => t.TechnologyGroup) // Eagerly load TechnologyGroup
             .Select(p => new
             {
                 p.Id,
@@ -38,16 +38,18 @@ public class ProjectsController : ControllerBase
                 p.EndDate,
                 p.Difficulty,
                 p.CategoryId,
-                p.Category.Name,
+                Category = p.Category != null ? p.Category.Name : null,
                 Technologies = p.ProjectTechnologies.Select(pt => new
                 {
                     pt.TechnologyId,
-                    pt.Technology.Name
-                })
+                    TechnologyName = pt.Technology != null ? pt.Technology.Name : null,
+                    TechnologyGroup = pt.Technology.TechnologyGroup != null ? pt.Technology.TechnologyGroup.Name : null
+                }).ToList()
             }).ToList();
 
         return Ok(projects);
     }
+
 
 
     [HttpGet("{id}")]
@@ -75,7 +77,6 @@ public class ProjectsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        // Create the Project entity
         var project = new Project
         {
             Title = projectDto.Title,
@@ -86,14 +87,13 @@ public class ProjectsController : ControllerBase
             StartDate = projectDto.StartDate,
             EndDate = projectDto.EndDate,
             Difficulty = projectDto.Difficulty,
-            CategoryId = projectDto.CategoryId
+            CategoryId = projectDto.CategoryId // Ensure CategoryId is assigned
         };
 
-        // Add the project to the context
         _context.Projects.Add(project);
         _context.SaveChanges();
 
-        // Add the technologies associated with the project
+        // Associate technologies with the project
         if (projectDto.TechnologyIds != null && projectDto.TechnologyIds.Count > 0)
         {
             foreach (var techId in projectDto.TechnologyIds)
@@ -110,7 +110,6 @@ public class ProjectsController : ControllerBase
 
         return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
     }
-
 
 
     [HttpPut("{id}")]
