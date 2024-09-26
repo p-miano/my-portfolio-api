@@ -8,10 +8,13 @@ public class Project
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+
     [Required]
     public string Title { get; set; }
+
     [Required]
     public string Description { get; set; }
+
     public string? GithubLink { get; set; }
     public string? DeployedLink { get; set; }
     public bool IsVisible { get; set; }
@@ -26,5 +29,5 @@ public class Project
     public Category Category { get; set; }
 
     // Navigation Property for ProjectTechnologies
-    public ICollection<ProjectTechnology> ProjectTechnologies { get; set; }
+    public ICollection<ProjectTechnology> ProjectTechnologies { get; set; } = new List<ProjectTechnology>();
 }

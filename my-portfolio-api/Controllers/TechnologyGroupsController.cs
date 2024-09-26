@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using my_portfolio_api.Data;
+using my_portfolio_api.DTOs;
 using my_portfolio_api.Models;
 
 namespace my_portfolio_api.Controllers;
@@ -20,26 +21,19 @@ public class TechnologyGroupsController : ControllerBase
     [HttpGet]
     public IActionResult GetTechnologyGroups()
     {
-        var technologyGroups = _context.TechnologyGroups
-            .AsNoTracking()
-            .Include(tg => tg.Technologies)
-            .ToList() // Load all data into memory before projection
-            .Select(tg => new
+        var groups = _context.TechnologyGroups.Select(g => new TechnologyGroupReadDto
+        {
+            Id = g.Id,
+            Name = g.Name,
+            Technologies = g.Technologies.Select(t => new TechnologyReadDto
             {
-                tg.Id,
-                tg.Name,
-                Technologies = tg.Technologies
-                    .Select(t => new
-                    {
-                        t.Id,
-                        t.Name
-                    })
-                    .OrderBy(t => t.Name) // Order technologies alphabetically
-                    .ToList()
-            })
-            .ToList();
+                Id = t.Id,
+                Name = t.Name,
+                TechnologyGroupName = g.Name // Assuming this property exists in TechnologyReadDto
+            }).ToList()
+        }).ToList();
 
-        return Ok(technologyGroups);
+        return Ok(groups);
     }
 
     // Route: GET /api/technologygroups/{id}
@@ -47,18 +41,18 @@ public class TechnologyGroupsController : ControllerBase
     public IActionResult GetTechnologyGroup(int id)
     {
         var group = _context.TechnologyGroups
-            .Include(tg => tg.Technologies) // Include Technologies in the specific group
-            .Select(tg => new
+            .Include(g => g.Technologies) // Include associated technologies
+            .Select(g => new TechnologyGroupReadDto
             {
-                tg.Id,
-                tg.Name,
-                Technologies = tg.Technologies.Select(t => new
+                Id = g.Id,
+                Name = g.Name,
+                Technologies = g.Technologies.Select(t => new TechnologyReadDto
                 {
-                    t.Id,
-                    t.Name
+                    Id = t.Id,
+                    Name = t.Name
                 }).ToList()
             })
-            .FirstOrDefault(tg => tg.Id == id);
+            .FirstOrDefault(g => g.Id == id);
 
         if (group == null)
         {
@@ -70,7 +64,7 @@ public class TechnologyGroupsController : ControllerBase
 
     // Route: PUT /api/technologygroups/{id}
     [HttpPut("{id}")]
-    public IActionResult UpdateTechnologyGroup(int id, [FromBody] TechnologyGroup updatedGroup)
+    public IActionResult UpdateTechnologyGroup(int id, [FromBody] TechnologyGroupUpdateDto updatedGroupDto)
     {
         var group = _context.TechnologyGroups.Find(id);
         if (group == null)
@@ -78,7 +72,7 @@ public class TechnologyGroupsController : ControllerBase
             return NotFound("Technology Group not found.");
         }
 
-        group.Name = updatedGroup.Name;
+        group.Name = updatedGroupDto.Name;
         _context.SaveChanges();
 
         return NoContent();
@@ -107,5 +101,4 @@ public class TechnologyGroupsController : ControllerBase
 
         return NoContent();
     }
-
 }

@@ -1,7 +1,7 @@
 ﻿using my_portfolio_api.Models;
 namespace my_portfolio_api.DTOs;
 
-public class ProjectCreateDto
+public class ProjectUpdateDto
 {
     public string Title { get; set; }
     public string Description { get; set; }
@@ -12,6 +12,6 @@ public class ProjectCreateDto
     public DateTime? EndDate { get; set; }
     public DifficultyLevel Difficulty { get; set; }
     public int CategoryId { get; set; }
-    public List<int> TechnologyIds { get; set; } // Selected technology IDs
+    public List<int> TechnologyIds { get; set; }
 }
 

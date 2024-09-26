@@ -9,6 +9,7 @@ public class Technology
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+
     [Required]
     public string Name { get; set; }
 
@@ -22,5 +23,5 @@ public class Technology
 
     // Navigation Property for ProjectTechnologies
     [JsonIgnore]
-    public ICollection<ProjectTechnology> ProjectTechnologies { get; set; }
+    public ICollection<ProjectTechnology> ProjectTechnologies { get; set; } = new List<ProjectTechnology>();
 }

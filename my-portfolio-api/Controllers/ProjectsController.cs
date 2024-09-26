@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using my_portfolio_api.Data;
-using my_portfolio_api.Models;
 using my_portfolio_api.DTOs;
-
+using my_portfolio_api.Models;
 
 namespace my_portfolio_api.Controllers;
 
@@ -18,6 +17,7 @@ public class ProjectsController : ControllerBase
         _context = context;
     }
 
+    // Route: GET /api/projects
     [HttpGet]
     public IActionResult GetProjects()
     {
@@ -26,24 +26,25 @@ public class ProjectsController : ControllerBase
             .Include(p => p.ProjectTechnologies)
             .ThenInclude(pt => pt.Technology) // Eagerly load Technology
             .ThenInclude(t => t.TechnologyGroup) // Eagerly load TechnologyGroup
-            .Select(p => new
+            .Select(p => new ProjectReadDto
             {
-                p.Id,
-                p.Title,
-                p.Description,
-                p.GithubLink,
-                p.DeployedLink,
-                p.IsVisible,
-                p.StartDate,
-                p.EndDate,
-                p.Difficulty,
-                p.CategoryId,
-                Category = p.Category != null ? p.Category.Name : null,
-                Technologies = p.ProjectTechnologies.Select(pt => new
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                GithubLink = p.GithubLink,
+                DeployedLink = p.DeployedLink,
+                IsVisible = p.IsVisible,
+                StartDate = p.StartDate,
+                EndDate = p.EndDate,
+                Difficulty = p.Difficulty,
+                CategoryName = p.Category.Name,
+
+                // Map the technologies here
+                Technologies = p.ProjectTechnologies.Select(pt => new TechnologyReadDto
                 {
-                    pt.TechnologyId,
-                    TechnologyName = pt.Technology != null ? pt.Technology.Name : null,
-                    TechnologyGroup = pt.Technology.TechnologyGroup != null ? pt.Technology.TechnologyGroup.Name : null
+                    Id = pt.Technology.Id,
+                    Name = pt.Technology.Name,
+                    TechnologyGroupName = pt.Technology.TechnologyGroup.Name
                 }).ToList()
             }).ToList();
 
@@ -51,7 +52,7 @@ public class ProjectsController : ControllerBase
     }
 
 
-
+    // Route: GET /api/projects/{id}
     [HttpGet("{id}")]
     public IActionResult GetProject(int id)
     {
@@ -59,6 +60,25 @@ public class ProjectsController : ControllerBase
             .Include(p => p.Category)
             .Include(p => p.ProjectTechnologies)
             .ThenInclude(pt => pt.Technology)
+            .Select(p => new ProjectReadDto
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Description = p.Description,
+                GithubLink = p.GithubLink,
+                DeployedLink = p.DeployedLink,
+                IsVisible = p.IsVisible,
+                StartDate = p.StartDate,
+                EndDate = p.EndDate,
+                Difficulty = p.Difficulty,
+                CategoryName = p.Category.Name,
+                Technologies = p.ProjectTechnologies.Select(pt => new TechnologyReadDto
+                {
+                    Id = pt.Technology.Id,
+                    Name = pt.Technology.Name,
+                    TechnologyGroupName = pt.Technology.TechnologyGroup.Name
+                }).ToList()
+            })
             .FirstOrDefault(p => p.Id == id);
 
         if (project == null)
@@ -69,6 +89,7 @@ public class ProjectsController : ControllerBase
         return Ok(project);
     }
 
+    // Route: POST /api/projects
     [HttpPost]
     public IActionResult CreateProject([FromBody] ProjectCreateDto projectDto)
     {
@@ -77,6 +98,7 @@ public class ProjectsController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        // Create a new project based on the DTO
         var project = new Project
         {
             Title = projectDto.Title,
@@ -111,32 +133,45 @@ public class ProjectsController : ControllerBase
         return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
     }
 
-
+    // Route: PUT /api/projects/{id}
     [HttpPut("{id}")]
-    public IActionResult UpdateProject(int id, Project updatedProject)
+    public IActionResult UpdateProject(int id, [FromBody] ProjectUpdateDto updatedProjectDto)
     {
-        var project = _context.Projects.Find(id);
+        var project = _context.Projects.Include(p => p.ProjectTechnologies).FirstOrDefault(p => p.Id == id);
         if (project == null)
         {
             return NotFound();
         }
 
         // Update fields
-        project.Title = updatedProject.Title;
-        project.Description = updatedProject.Description;
-        project.GithubLink = updatedProject.GithubLink;
-        project.DeployedLink = updatedProject.DeployedLink;
-        project.IsVisible = updatedProject.IsVisible;
-        project.StartDate = updatedProject.StartDate;
-        project.EndDate = updatedProject.EndDate;
-        project.Difficulty = updatedProject.Difficulty;
-        project.CategoryId = updatedProject.CategoryId;
+        project.Title = updatedProjectDto.Title;
+        project.Description = updatedProjectDto.Description;
+        project.GithubLink = updatedProjectDto.GithubLink;
+        project.DeployedLink = updatedProjectDto.DeployedLink;
+        project.IsVisible = updatedProjectDto.IsVisible;
+        project.StartDate = updatedProjectDto.StartDate;
+        project.EndDate = updatedProjectDto.EndDate;
+        project.Difficulty = updatedProjectDto.Difficulty;
+        project.CategoryId = updatedProjectDto.CategoryId;
+
+        // Handle updating technologies if provided
+        if (updatedProjectDto.TechnologyIds != null && updatedProjectDto.TechnologyIds.Count > 0)
+        {
+            // Remove old associations
+            _context.ProjectTechnologies.RemoveRange(project.ProjectTechnologies);
+            // Add new associations
+            foreach (var techId in updatedProjectDto.TechnologyIds)
+            {
+                _context.ProjectTechnologies.Add(new ProjectTechnology { ProjectId = id, TechnologyId = techId });
+            }
+        }
 
         _context.SaveChanges();
 
         return NoContent();
     }
 
+    // Route: DELETE /api/projects/{id}
     [HttpDelete("{id}")]
     public IActionResult DeleteProject(int id)
     {

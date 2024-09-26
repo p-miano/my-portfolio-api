@@ -21,11 +21,13 @@ public class TechnologiesController : ControllerBase
     [HttpGet]
     public IActionResult GetTechnologies()
     {
-        var technologies = _context.Technologies.Select(t => new
-        {
-            t.Id,
-            t.Name
-        }).ToList();
+        var technologies = _context.Technologies
+            .Select(t => new TechnologyReadDto
+            {
+                Id = t.Id,
+                Name = t.Name,
+                TechnologyGroupName = t.TechnologyGroup.Name
+            }).ToList();
 
         return Ok(technologies);
     }
@@ -36,6 +38,12 @@ public class TechnologiesController : ControllerBase
     {
         var technology = _context.Technologies
             .Include(t => t.TechnologyGroup)
+            .Select(t => new TechnologyReadDto
+            {
+                Id = t.Id,
+                Name = t.Name,
+                TechnologyGroupName = t.TechnologyGroup.Name
+            })
             .FirstOrDefault(t => t.Id == id);
 
         if (technology == null)
@@ -66,20 +74,23 @@ public class TechnologiesController : ControllerBase
         var technology = new Technology
         {
             Name = technologyDto.Name,
-            TechnologyGroupId = technologyDto.TechnologyGroupId,
-            TechnologyGroup = technologyGroup
+            TechnologyGroupId = technologyDto.TechnologyGroupId
         };
 
         _context.Technologies.Add(technology);
         _context.SaveChanges();
 
-        return CreatedAtAction(nameof(GetTechnology), new { id = technology.Id }, technology);
+        return CreatedAtAction(nameof(GetTechnology), new { id = technology.Id }, new TechnologyReadDto
+        {
+            Id = technology.Id,
+            Name = technology.Name,
+            TechnologyGroupName = technologyGroup.Name
+        });
     }
-
 
     // Route: PUT /api/technologies/{id}
     [HttpPut("{id}")]
-    public IActionResult UpdateTechnology(int id, [FromBody] Technology updatedTechnology)
+    public IActionResult UpdateTechnology(int id, [FromBody] TechnologyUpdateDto updatedTechnologyDto)
     {
         var technology = _context.Technologies.Find(id);
         if (technology == null)
@@ -87,8 +98,8 @@ public class TechnologiesController : ControllerBase
             return NotFound("Technology not found.");
         }
 
-        technology.Name = updatedTechnology.Name;
-        technology.TechnologyGroupId = updatedTechnology.TechnologyGroupId;
+        technology.Name = updatedTechnologyDto.Name;
+        technology.TechnologyGroupId = updatedTechnologyDto.TechnologyGroupId;
         _context.SaveChanges();
 
         return NoContent();
@@ -117,5 +128,4 @@ public class TechnologiesController : ControllerBase
 
         return NoContent();
     }
-
 }

@@ -9,10 +9,11 @@ public class Category
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+
     [Required]
     public string Name { get; set; }
 
     // Add the navigation property for Projects
     [JsonIgnore]
-    public ICollection<Project> Projects { get; set; }
+    public ICollection<Project> Projects { get; set; } = new List<Project>();
 }

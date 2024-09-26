@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using my_portfolio_api.Data;
+using my_portfolio_api.DTOs;
 using my_portfolio_api.Models;
 
 namespace my_portfolio_api.Controllers;
@@ -20,11 +21,13 @@ public class CategoriesController : ControllerBase
     [HttpGet]
     public IActionResult GetCategories()
     {
-        var categories = _context.Categories.Select(c => new
-        {
-            c.Id,
-            c.Name
-        }).ToList();
+        // Return a list of CategoryReadDto
+        var categories = _context.Categories
+            .Select(c => new CategoryReadDto
+            {
+                Id = c.Id,
+                Name = c.Name
+            }).ToList();
 
         return Ok(categories);
     }
@@ -33,7 +36,15 @@ public class CategoriesController : ControllerBase
     [HttpGet("{id}")]
     public IActionResult GetCategory(int id)
     {
-        var category = _context.Categories.Find(id);
+        // Return a single CategoryReadDto
+        var category = _context.Categories
+            .Select(c => new CategoryReadDto
+            {
+                Id = c.Id,
+                Name = c.Name
+            })
+            .FirstOrDefault(c => c.Id == id);
+
         if (category == null)
         {
             return NotFound();
@@ -44,17 +55,32 @@ public class CategoriesController : ControllerBase
 
     // Route: POST /api/categories
     [HttpPost]
-    public IActionResult CreateCategory(Category category)
+    public IActionResult CreateCategory([FromBody] CategoryCreateDto categoryDto)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // Create a new category from the DTO
+        var category = new Category
+        {
+            Name = categoryDto.Name
+        };
+
         _context.Categories.Add(category);
         _context.SaveChanges();
 
-        return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, category);
+        return CreatedAtAction(nameof(GetCategory), new { id = category.Id }, new CategoryReadDto
+        {
+            Id = category.Id,
+            Name = category.Name
+        });
     }
 
     // Route: PUT /api/categories/{id}
     [HttpPut("{id}")]
-    public IActionResult UpdateCategory(int id, [FromBody] Category updatedCategory)
+    public IActionResult UpdateCategory(int id, [FromBody] CategoryUpdateDto updatedCategoryDto)
     {
         var category = _context.Categories.Find(id);
         if (category == null)
@@ -62,7 +88,8 @@ public class CategoriesController : ControllerBase
             return NotFound("Category not found.");
         }
 
-        category.Name = updatedCategory.Name;
+        // Update the category based on the DTO
+        category.Name = updatedCategoryDto.Name;
         _context.SaveChanges();
 
         return NoContent();
@@ -91,6 +118,4 @@ public class CategoriesController : ControllerBase
 
         return NoContent();
     }
-
-
 }
