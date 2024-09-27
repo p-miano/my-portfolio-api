@@ -4,6 +4,6 @@ public class TechnologyGroupReadDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
-    public List<TechnologyReadDto> Technologies { get; set; } // Use TechnologyReadDto
+    public List<TechnologyReadNoGroupDto> Technologies { get; set; } // Use TechnologyReadDto
 }
 

@@ -21,17 +21,19 @@ public class TechnologyGroupsController : ControllerBase
     [HttpGet]
     public IActionResult GetTechnologyGroups()
     {
-        var groups = _context.TechnologyGroups.Select(g => new TechnologyGroupReadDto
-        {
-            Id = g.Id,
-            Name = g.Name,
-            Technologies = g.Technologies.Select(t => new TechnologyReadDto
+        var groups = _context.TechnologyGroups
+            .Include(g => g.Technologies) // Load technologies for each group
+            .AsEnumerable() // Perform the projection in-memory
+            .Select(g => new TechnologyGroupReadDto
             {
-                Id = t.Id,
-                Name = t.Name,
-                TechnologyGroupName = g.Name // Assuming this property exists in TechnologyReadDto
-            }).ToList()
-        }).ToList();
+                Id = g.Id,
+                Name = g.Name,
+                Technologies = g.Technologies.Select(t => new TechnologyReadNoGroupDto
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                }).ToList()
+            }).ToList();
 
         return Ok(groups);
     }
@@ -41,18 +43,19 @@ public class TechnologyGroupsController : ControllerBase
     public IActionResult GetTechnologyGroup(int id)
     {
         var group = _context.TechnologyGroups
-            .Include(g => g.Technologies) // Include associated technologies
+            .Include(g => g.Technologies) // Load technologies for the group
+            .AsEnumerable() // Perform the projection in-memory
             .Select(g => new TechnologyGroupReadDto
             {
                 Id = g.Id,
                 Name = g.Name,
-                Technologies = g.Technologies.Select(t => new TechnologyReadDto
+                Technologies = g.Technologies.Select(t => new TechnologyReadNoGroupDto
                 {
                     Id = t.Id,
                     Name = t.Name
                 }).ToList()
             })
-            .FirstOrDefault(g => g.Id == id);
+            .FirstOrDefault(g => g.Id == id); // Find the group by ID
 
         if (group == null)
         {
@@ -60,6 +63,26 @@ public class TechnologyGroupsController : ControllerBase
         }
 
         return Ok(group);
+    }
+
+    // Route: POST /api/technologygroups
+    [HttpPost]
+    public IActionResult CreateTechnologyGroup([FromBody] TechnologyGroupCreateDto newGroupDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var group = new TechnologyGroup
+        {
+            Name = newGroupDto.Name
+        };
+
+        _context.TechnologyGroups.Add(group);
+        _context.SaveChanges();
+
+        return CreatedAtAction(nameof(GetTechnologyGroup), new { id = group.Id }, group);
     }
 
     // Route: PUT /api/technologygroups/{id}
