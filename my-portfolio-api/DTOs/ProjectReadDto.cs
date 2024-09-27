@@ -11,7 +11,9 @@ public class ProjectReadDto
     public bool IsVisible { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public DifficultyLevel Difficulty { get; set; }
+    // Return both the int and string name of the DifficultyLevel enum
+    public int DifficultyValue { get; set; }
+    public string DifficultyName { get; set; }
     public string CategoryName { get; set; }
 
     // Add this property to hold the technologies

@@ -36,7 +36,11 @@ public class ProjectsController : ControllerBase
                 IsVisible = p.IsVisible,
                 StartDate = p.StartDate,
                 EndDate = p.EndDate,
-                Difficulty = p.Difficulty,
+
+                // Return both the value and the name of the Difficulty enum
+                DifficultyValue = (int)p.Difficulty,
+                DifficultyName = p.Difficulty.ToString(),
+
                 CategoryName = p.Category.Name,
 
                 // Map the technologies here
@@ -70,7 +74,11 @@ public class ProjectsController : ControllerBase
                 IsVisible = p.IsVisible,
                 StartDate = p.StartDate,
                 EndDate = p.EndDate,
-                Difficulty = p.Difficulty,
+
+                // Return both the value and the name of the Difficulty enum
+                DifficultyValue = (int)p.Difficulty,
+                DifficultyName = p.Difficulty.ToString(),
+
                 CategoryName = p.Category.Name,
                 Technologies = p.ProjectTechnologies.Select(pt => new TechnologyReadDto
                 {
@@ -108,12 +116,12 @@ public class ProjectsController : ControllerBase
             IsVisible = projectDto.IsVisible,
             StartDate = projectDto.StartDate,
             EndDate = projectDto.EndDate,
-            Difficulty = projectDto.Difficulty,
-            CategoryId = projectDto.CategoryId // Ensure CategoryId is assigned
+            Difficulty = (DifficultyLevel)projectDto.Difficulty,
+            CategoryId = projectDto.CategoryId
         };
 
+        // Add the project to the context
         _context.Projects.Add(project);
-        _context.SaveChanges();
 
         // Associate technologies with the project
         if (projectDto.TechnologyIds != null && projectDto.TechnologyIds.Count > 0)
@@ -122,16 +130,50 @@ public class ProjectsController : ControllerBase
             {
                 _context.ProjectTechnologies.Add(new ProjectTechnology
                 {
-                    ProjectId = project.Id,
+                    Project = project, // Attach the project here, no need to re-fetch it
                     TechnologyId = techId
                 });
             }
         }
 
+        // Before saving, attach related entities (Category and Technologies) manually:
+        project.Category = _context.Categories.Find(project.CategoryId); // Attach Category
+        var technologies = _context.Technologies
+            .Where(t => projectDto.TechnologyIds.Contains(t.Id))
+            .Include(t => t.TechnologyGroup) // Include TechnologyGroup
+            .ToList();
+
+        // Save all the changes
         _context.SaveChanges();
 
-        return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
+        // Create the response DTO without making an extra database query
+        var projectWithDetails = new ProjectReadDto
+        {
+            Id = project.Id,
+            Title = project.Title,
+            Description = project.Description,
+            GithubLink = project.GithubLink,
+            DeployedLink = project.DeployedLink,
+            IsVisible = project.IsVisible,
+
+            // No formatting, just pass the DateTime? value
+            StartDate = project.StartDate,
+            EndDate = project.EndDate,
+
+            DifficultyValue = (int)project.Difficulty,
+            DifficultyName = project.Difficulty.ToString(),
+            CategoryName = project.Category?.Name,
+            Technologies = technologies.Select(t => new TechnologyReadDto
+            {
+                Id = t.Id,
+                Name = t.Name,
+                TechnologyGroupName = t.TechnologyGroup?.Name
+            }).ToList()
+        };
+
+        return CreatedAtAction(nameof(GetProject), new { id = project.Id }, projectWithDetails);
     }
+
 
     // Route: PUT /api/projects/{id}
     [HttpPut("{id}")]
@@ -151,7 +193,10 @@ public class ProjectsController : ControllerBase
         project.IsVisible = updatedProjectDto.IsVisible;
         project.StartDate = updatedProjectDto.StartDate;
         project.EndDate = updatedProjectDto.EndDate;
-        project.Difficulty = updatedProjectDto.Difficulty;
+
+        // Convert the integer Difficulty to the Enum
+        project.Difficulty = (DifficultyLevel)updatedProjectDto.Difficulty;
+
         project.CategoryId = updatedProjectDto.CategoryId;
 
         // Handle updating technologies if provided

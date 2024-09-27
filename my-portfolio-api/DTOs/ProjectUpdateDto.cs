@@ -10,7 +10,10 @@ public class ProjectUpdateDto
     public bool IsVisible { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
-    public DifficultyLevel Difficulty { get; set; }
+
+    // Accept only the int value for DifficultyLevel
+    public int Difficulty { get; set; }
+
     public int CategoryId { get; set; }
     public List<int> TechnologyIds { get; set; }
 }
