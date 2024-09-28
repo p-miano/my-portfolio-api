@@ -1,4 +1,5 @@
 ﻿using my_portfolio_api.Models;
+using System.ComponentModel.DataAnnotations;
 namespace my_portfolio_api.DTOs;
 
 public class ProjectCreateDto
@@ -10,7 +11,11 @@ public class ProjectCreateDto
     public bool IsVisible { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
+
+    // EnumDataType attribute is used to validate the value of the Difficulty property
+    [EnumDataType(typeof(DifficultyLevel), ErrorMessage = "Invalid difficulty level.")]
     public DifficultyLevel Difficulty { get; set; }
+
     public int CategoryId { get; set; }
     public List<int> TechnologyIds { get; set; } // Selected technology IDs
 }

@@ -1,4 +1,5 @@
 ﻿using my_portfolio_api.Models;
+using System.ComponentModel.DataAnnotations;
 namespace my_portfolio_api.DTOs;
 
 public class ProjectUpdateDto
@@ -11,7 +12,7 @@ public class ProjectUpdateDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
 
-    // Accept only the int value for DifficultyLevel
+    [EnumDataType(typeof(DifficultyLevel), ErrorMessage = "Invalid difficulty level.")]
     public int Difficulty { get; set; }
 
     public int CategoryId { get; set; }

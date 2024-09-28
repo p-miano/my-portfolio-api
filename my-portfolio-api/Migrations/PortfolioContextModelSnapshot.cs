@@ -157,7 +157,7 @@ namespace my_portfolio_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("my_portfolio_api.Models.Project", b =>
@@ -202,7 +202,7 @@ namespace my_portfolio_api.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("my_portfolio_api.Models.ProjectTechnology", b =>
@@ -219,7 +219,7 @@ namespace my_portfolio_api.Migrations
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("ProjectTechnologies");
+                    b.ToTable("ProjectTechnologies", (string)null);
                 });
 
             modelBuilder.Entity("my_portfolio_api.Models.Technology", b =>
@@ -239,7 +239,7 @@ namespace my_portfolio_api.Migrations
 
                     b.HasIndex("TechnologyGroupId");
 
-                    b.ToTable("Technologies");
+                    b.ToTable("Technologies", (string)null);
                 });
 
             modelBuilder.Entity("my_portfolio_api.Models.TechnologyGroup", b =>
@@ -254,7 +254,7 @@ namespace my_portfolio_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TechnologyGroups");
+                    b.ToTable("TechnologyGroups", (string)null);
                 });
 
             modelBuilder.Entity("my_portfolio_api.Models.User", b =>
@@ -337,7 +337,7 @@ namespace my_portfolio_api.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("UserCategories");
+                    b.ToTable("UserCategories", (string)null);
                 });
 
             modelBuilder.Entity("my_portfolio_api.Models.UserTechnology", b =>
@@ -352,7 +352,7 @@ namespace my_portfolio_api.Migrations
 
                     b.HasIndex("TechnologyId");
 
-                    b.ToTable("UserTechnologies");
+                    b.ToTable("UserTechnologies", (string)null);
                 });
 
             modelBuilder.Entity("my_portfolio_api.Models.UserTechnologyGroup", b =>
@@ -367,7 +367,7 @@ namespace my_portfolio_api.Migrations
 
                     b.HasIndex("TechnologyGroupId");
 
-                    b.ToTable("UserTechnologyGroups");
+                    b.ToTable("UserTechnologyGroups", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

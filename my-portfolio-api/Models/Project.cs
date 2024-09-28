@@ -34,3 +34,4 @@ public class Project
     // Navigation Property for ProjectTechnologies
     public ICollection<ProjectTechnology> ProjectTechnologies { get; set; } = new List<ProjectTechnology>();
 }
+
