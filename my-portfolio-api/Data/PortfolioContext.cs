@@ -1,15 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using my_portfolio_api.Models;
 
 namespace my_portfolio_api.Data
 {
-    public class PortfolioContext : DbContext
+    public class PortfolioContext : IdentityDbContext<ApplicationUser>
     {
         public PortfolioContext(DbContextOptions<PortfolioContext> options) : base(options)
         {
         }
 
         public DbSet<Category> Categories { get; set; }
+        public DbSet<UserCategory> UserCategories { get; set; } // Junction table for many-to-many relationship
         public DbSet<Project> Projects { get; set; }
         public DbSet<Technology> Technologies { get; set; }
         public DbSet<TechnologyGroup> TechnologyGroups { get; set; }
@@ -18,6 +20,22 @@ namespace my_portfolio_api.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Many-to-Many relationship between ApplicationUser and Category via UserCategory
+            modelBuilder.Entity<UserCategory>()
+                .HasKey(uc => new { uc.UserId, uc.CategoryId }); // Composite key
+
+            modelBuilder.Entity<UserCategory>()
+                .HasOne(uc => uc.User)
+                .WithMany(u => u.UserCategories)
+                .HasForeignKey(uc => uc.UserId)
+                .OnDelete(DeleteBehavior.Cascade);  // Ensure proper cascading on delete
+
+            modelBuilder.Entity<UserCategory>()
+                .HasOne(uc => uc.Category)
+                .WithMany(c => c.UserCategories)
+                .HasForeignKey(uc => uc.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);  // Ensure proper cascading on delete
 
             // Seed data for Categories
             modelBuilder.Entity<Category>().HasData(
@@ -69,6 +87,5 @@ namespace my_portfolio_api.Data
                 new ProjectTechnology { ProjectId = 1, TechnologyId = 3 }  // ASP.NET Core
             );
         }
-
     }
 }

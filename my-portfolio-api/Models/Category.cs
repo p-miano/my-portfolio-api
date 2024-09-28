@@ -13,7 +13,10 @@ public class Category
     [Required]
     public string Name { get; set; }
 
-    // Add the navigation property for Projects
+    // Navigation property for many-to-many User association
+    public ICollection<UserCategory> UserCategories { get; set; } 
+
+    // Navigation property for Projects
     [JsonIgnore]
     public ICollection<Project> Projects { get; set; } = new List<Project>();
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using my_portfolio_api.Data;
 using my_portfolio_api.DTOs;
@@ -97,8 +98,8 @@ public class ProjectsController : ControllerBase
         return Ok(project);
     }
 
-    // Route: POST /api/projects
-    [HttpPost]
+    [Authorize]
+    [HttpPost] // Route: POST /api/projects
     public IActionResult CreateProject([FromBody] ProjectCreateDto projectDto)
     {
         if (!ModelState.IsValid)
@@ -175,8 +176,8 @@ public class ProjectsController : ControllerBase
     }
 
 
-    // Route: PUT /api/projects/{id}
-    [HttpPut("{id}")]
+    [Authorize]
+    [HttpPut("{id}")] // Route: PUT /api/projects/{id}
     public IActionResult UpdateProject(int id, [FromBody] ProjectUpdateDto updatedProjectDto)
     {
         var project = _context.Projects.Include(p => p.ProjectTechnologies).FirstOrDefault(p => p.Id == id);
@@ -216,8 +217,8 @@ public class ProjectsController : ControllerBase
         return NoContent();
     }
 
-    // Route: DELETE /api/projects/{id}
-    [HttpDelete("{id}")]
+    [Authorize]
+    [HttpDelete("{id}")] // Route: DELETE /api/projects/{id}
     public IActionResult DeleteProject(int id)
     {
         var project = _context.Projects.Find(id);

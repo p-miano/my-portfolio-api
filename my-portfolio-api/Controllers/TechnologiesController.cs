@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using my_portfolio_api.Data;
 using my_portfolio_api.DTOs;
@@ -54,8 +55,8 @@ public class TechnologiesController : ControllerBase
         return Ok(technology);
     }
 
-    // Route: POST /api/technologies
-    [HttpPost]
+    [Authorize]
+    [HttpPost] // Route: POST /api/technologies
     public IActionResult CreateTechnology([FromBody] TechnologyCreateDto technologyDto)
     {
         if (!ModelState.IsValid)
@@ -88,8 +89,8 @@ public class TechnologiesController : ControllerBase
         });
     }
 
-    // Route: PUT /api/technologies/{id}
-    [HttpPut("{id}")]
+    [Authorize]
+    [HttpPut("{id}")] // Route: PUT /api/technologies/{id}
     public IActionResult UpdateTechnology(int id, [FromBody] TechnologyUpdateDto updatedTechnologyDto)
     {
         var technology = _context.Technologies.Find(id);
@@ -105,8 +106,8 @@ public class TechnologiesController : ControllerBase
         return NoContent();
     }
 
-    // Route: DELETE /api/technologies/{id}
-    [HttpDelete("{id}")]
+    [Authorize]
+    [HttpDelete("{id}")] // Route: DELETE /api/technologies/{id}
     public IActionResult DeleteTechnology(int id)
     {
         var technology = _context.Technologies

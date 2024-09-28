@@ -20,4 +20,5 @@ public class ProjectTechnology
     [JsonIgnore] // Avoid including the entire Technology object in the response
     [Required]
     public Technology Technology { get; set; }
+
 }

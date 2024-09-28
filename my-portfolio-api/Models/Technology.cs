@@ -16,6 +16,9 @@ public class Technology
     // Foreign Key for TechnologyGroup
     public int TechnologyGroupId { get; set; }
 
+    // Foreign key to associate with a user
+    public string? UserId { get; set; }
+
     // Navigation Property for TechnologyGroup
     [Required]    
     [JsonIgnore] // Avoid serializing TechnologyGroup to prevent cycles

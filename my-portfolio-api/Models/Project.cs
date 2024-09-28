@@ -25,6 +25,9 @@ public class Project
     // Foreign Key for Category
     public int CategoryId { get; set; }
 
+    // Foreign key to associate with a user
+    public string? UserId { get; set; }
+
     // Navigation Property for Category
     public Category Category { get; set; }
 

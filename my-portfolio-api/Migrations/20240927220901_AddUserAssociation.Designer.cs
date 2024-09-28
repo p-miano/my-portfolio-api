@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using my_portfolio_api.Data;
 
@@ -10,9 +11,11 @@ using my_portfolio_api.Data;
 namespace my_portfolio_api.Migrations
 {
     [DbContext(typeof(PortfolioContext))]
-    partial class PortfolioContextModelSnapshot : ModelSnapshot
+    [Migration("20240927220901_AddUserAssociation")]
+    partial class AddUserAssociation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -164,10 +167,6 @@ namespace my_portfolio_api.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
@@ -221,6 +220,9 @@ namespace my_portfolio_api.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserId")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -423,21 +425,6 @@ namespace my_portfolio_api.Migrations
                         });
                 });
 
-            modelBuilder.Entity("my_portfolio_api.Models.UserCategory", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("UserId", "CategoryId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("UserCategories");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -530,35 +517,9 @@ namespace my_portfolio_api.Migrations
                     b.Navigation("TechnologyGroup");
                 });
 
-            modelBuilder.Entity("my_portfolio_api.Models.UserCategory", b =>
-                {
-                    b.HasOne("my_portfolio_api.Models.Category", "Category")
-                        .WithMany("UserCategories")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("my_portfolio_api.Models.ApplicationUser", "User")
-                        .WithMany("UserCategories")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("my_portfolio_api.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("UserCategories");
-                });
-
             modelBuilder.Entity("my_portfolio_api.Models.Category", b =>
                 {
                     b.Navigation("Projects");
-
-                    b.Navigation("UserCategories");
                 });
 
             modelBuilder.Entity("my_portfolio_api.Models.Project", b =>

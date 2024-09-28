@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using my_portfolio_api.Data;
 using my_portfolio_api.DTOs;
@@ -65,8 +66,8 @@ public class TechnologyGroupsController : ControllerBase
         return Ok(group);
     }
 
-    // Route: POST /api/technologygroups
-    [HttpPost]
+    [Authorize]
+    [HttpPost] // Route: POST /api/technologygroups
     public IActionResult CreateTechnologyGroup([FromBody] TechnologyGroupCreateDto newGroupDto)
     {
         if (!ModelState.IsValid)
@@ -85,8 +86,8 @@ public class TechnologyGroupsController : ControllerBase
         return CreatedAtAction(nameof(GetTechnologyGroup), new { id = group.Id }, group);
     }
 
-    // Route: PUT /api/technologygroups/{id}
-    [HttpPut("{id}")]
+    [Authorize]
+    [HttpPut("{id}")] // Route: PUT /api/technologygroups/{id}
     public IActionResult UpdateTechnologyGroup(int id, [FromBody] TechnologyGroupUpdateDto updatedGroupDto)
     {
         var group = _context.TechnologyGroups.Find(id);
@@ -101,8 +102,8 @@ public class TechnologyGroupsController : ControllerBase
         return NoContent();
     }
 
-    // Route: DELETE /api/technologygroups/{id}
-    [HttpDelete("{id}")]
+    [Authorize]
+    [HttpDelete("{id}")] // Route: DELETE /api/technologygroups/{id}
     public IActionResult DeleteTechnologyGroup(int id)
     {
         var group = _context.TechnologyGroups
