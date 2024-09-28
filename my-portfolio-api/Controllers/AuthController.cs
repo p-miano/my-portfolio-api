@@ -12,11 +12,11 @@ namespace my_portfolio_api.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        public AuthController(UserManager<User> userManager, SignInManager<User> signInManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -30,7 +30,7 @@ namespace my_portfolio_api.Controllers
                 return BadRequest(ModelState);
 
             // Create user with FullName, UserName, and Email
-            var user = new ApplicationUser
+            var user = new User
             {
                 FullName = model.FullName,
                 UserName = model.Email,
@@ -61,7 +61,7 @@ namespace my_portfolio_api.Controllers
         }
 
         // Generate token without email
-        private string GenerateJwtToken(ApplicationUser user)
+        private string GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");
             var claims = new[]

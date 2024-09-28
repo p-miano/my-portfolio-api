@@ -25,7 +25,7 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 
 // Add Identity services
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<PortfolioContext>()
     .AddDefaultTokenProviders();
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using my_portfolio_api.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -16,13 +17,14 @@ public class Technology
     // Foreign Key for TechnologyGroup
     public int TechnologyGroupId { get; set; }
 
-    // Foreign key to associate with a user
-    public string? UserId { get; set; }
-
     // Navigation Property for TechnologyGroup
-    [Required]    
+    [Required]
     [JsonIgnore] // Avoid serializing TechnologyGroup to prevent cycles
     public TechnologyGroup TechnologyGroup { get; set; }
+
+    // Navigation Property for Users
+    [JsonIgnore]
+    public ICollection<UserTechnology> UserTechnologies { get; set; } = new List<UserTechnology>();
 
     // Navigation Property for ProjectTechnologies
     [JsonIgnore]

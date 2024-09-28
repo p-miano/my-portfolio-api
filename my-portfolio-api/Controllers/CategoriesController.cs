@@ -19,12 +19,39 @@ namespace my_portfolio_api.Controllers
         {
             _context = context;
         }
-        
+
         [Authorize]
         [HttpGet] // Route: GET /api/categories
         public IActionResult GetCategories()
         {
-            // Retrieve the current user's Id from token (ClaimTypes.NameIdentifier)
+            // Retrieve the current user's Id from the token (ClaimTypes.NameIdentifier)
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Check if the user exists in the database
+            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+            if (user == null)
+            {
+                return BadRequest("User not found.");
+            }
+
+            // Retrieve all categories associated with the current user
+            var categories = _context.UserCategories
+                .Where(uc => uc.UserId == user.Id) // Match categories by user Id
+                .Include(uc => uc.Category) // Include the category details
+                .Select(uc => new CategoryReadDto
+                {
+                    Id = uc.Category.Id,
+                    Name = uc.Category.Name
+                }).ToList(); // Map the categories to DTO
+
+            return Ok(categories); // Return the list of categories
+        }
+
+        [Authorize]
+        [HttpGet("{id}")] // Route: GET /api/categories/{id}
+        public IActionResult GetCategory(int id)
+        {
+            // Retrieve the current user's Id
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             // Check if the user exists
@@ -34,87 +61,72 @@ namespace my_portfolio_api.Controllers
                 return BadRequest("User not found.");
             }
 
-            // Get categories associated with the current user
-            var categories = _context.UserCategories
-                .Where(uc => uc.UserId == user.Id)
-                .Include(uc => uc.Category)
-                .Select(uc => new CategoryReadDto
-                {
-                    Id = uc.Category.Id,
-                    Name = uc.Category.Name
-                }).ToList();
-
-            return Ok(categories);
-        }
-        
-        [Authorize]
-        [HttpGet("{id}")] // Route: GET /api/categories/{id}
-        public IActionResult GetCategory(int id)
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-            if (user == null)
-            {
-                return BadRequest("User not found.");
-            }
-
+            // Retrieve the category by Id, ensuring the current user is associated with it
             var category = _context.UserCategories
                 .Where(uc => uc.UserId == user.Id && uc.CategoryId == id)
-                .Include(uc => uc.Category)
+                .Include(uc => uc.Category) // Include the category details
                 .Select(uc => new CategoryReadDto
                 {
                     Id = uc.Category.Id,
                     Name = uc.Category.Name
                 })
-                .FirstOrDefault();
+                .FirstOrDefault(); // Return the category associated with the user
 
             if (category == null)
             {
-                return NotFound();
+                return NotFound(); // Return 404 if not found
             }
 
-            return Ok(category);
+            return Ok(category); // Return the found category
         }
-        
+
         [Authorize]
         [HttpPost] // Route: POST /api/categories
         public IActionResult CreateCategory([FromBody] CategoryCreateDto categoryDto)
         {
+            // Validate the incoming model
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(ModelState); // Return 400 if invalid
             }
 
-            // Retrieve the userId from the token (ClaimTypes.NameIdentifier)
+            // Retrieve the current user's Id
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            // Retrieve the user from the database
+            // Check if the user exists
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
             if (user == null)
             {
                 return BadRequest("User not found.");
             }
 
+            // Format the category name to title case
             var formattedName = StringHelper.FormatTitleCase(categoryDto.Name);
+
+            // Check if the category already exists globally
             var existingCategory = _context.Categories.FirstOrDefault(c => c.Name.ToLower() == formattedName.ToLower());
 
             if (existingCategory != null)
             {
+                // Check if the user is already associated with this category
                 var existingUserCategory = _context.UserCategories.FirstOrDefault(uc => uc.UserId == user.Id && uc.CategoryId == existingCategory.Id);
                 if (existingUserCategory != null)
                 {
-                    return Conflict("Category already exists for this user.");
+                    return Conflict("Category already exists for this user."); // Return conflict if it already exists
                 }
 
+                // Create a new user-category association
                 var newUserCategory = new UserCategory
                 {
                     UserId = user.Id,
                     CategoryId = existingCategory.Id
                 };
 
+                // Save the association to the database
                 _context.UserCategories.Add(newUserCategory);
                 _context.SaveChanges();
 
+                // Return the existing category
                 return CreatedAtAction(nameof(GetCategory), new { id = existingCategory.Id }, new CategoryReadDto
                 {
                     Id = existingCategory.Id,
@@ -122,30 +134,35 @@ namespace my_portfolio_api.Controllers
                 });
             }
 
+            // Create a new category if it does not exist globally
             var newCategory = new Category
             {
                 Name = formattedName
             };
 
+            // Save the new category to the database
             _context.Categories.Add(newCategory);
             _context.SaveChanges();
 
+            // Create the user-category association
             var userCategory = new UserCategory
             {
                 UserId = user.Id,
                 CategoryId = newCategory.Id
             };
 
+            // Save the association to the database
             _context.UserCategories.Add(userCategory);
             _context.SaveChanges();
 
+            // Return the created category
             return CreatedAtAction(nameof(GetCategory), new { id = newCategory.Id }, new CategoryReadDto
             {
                 Id = newCategory.Id,
                 Name = newCategory.Name
             });
         }
-        
+
         [Authorize]
         [HttpPut("{id}")] // Route: PUT /api/categories/{id}
         public IActionResult UpdateCategory(int id, [FromBody] CategoryUpdateDto updatedCategoryDto)
@@ -164,51 +181,58 @@ namespace my_portfolio_api.Controllers
             var category = _context.Categories.FirstOrDefault(c => c.Id == id);
             if (category == null)
             {
-                return NotFound("Category not found.");
+                return NotFound("Category not found."); // Return 404 if category does not exist
             }
 
             // Ensure that the current user is associated with the category
             var userCategory = _context.UserCategories.FirstOrDefault(uc => uc.UserId == user.Id && uc.CategoryId == id);
             if (userCategory == null)
             {
-                return Forbid("Bearer");
+                return Forbid("Bearer"); // Return 403 if the user has no permission to update
             }
 
-            // Update the category name
+            // Update the category name to the new value
             category.Name = StringHelper.FormatTitleCase(updatedCategoryDto.Name);
 
-            // Save the changes
+            // Save the changes to the database
             _context.SaveChanges();
 
-            return NoContent();
+            return NoContent(); // Return 204 on success with no content
         }
-                
+
         [Authorize]
         [HttpDelete("{id}")] // Route: DELETE /api/categories/{id}
         public IActionResult DeleteCategory(int id)
         {
+            // Retrieve the current user's Id
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // Check if the user exists
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
             if (user == null)
             {
                 return BadRequest("User not found.");
             }
 
+            // Find the category by Id
             var category = _context.Categories.FirstOrDefault(c => c.Id == id);
             if (category == null)
             {
                 return NotFound("Category not found.");
             }
 
+            // Ensure the current user is associated with the category
             var userCategory = _context.UserCategories.FirstOrDefault(uc => uc.UserId == user.Id && uc.CategoryId == id);
             if (userCategory == null)
             {
-                return Forbid("Bearer");
+                return Forbid("Bearer"); // Return 403 if user has no permission to delete
             }
 
+            // Remove the association between the user and the category
             _context.UserCategories.Remove(userCategory);
             _context.SaveChanges();
 
+            // If no other users are associated with this category, delete the category
             var isCategoryUsedByOthers = _context.UserCategories.Any(uc => uc.CategoryId == id);
             if (!isCategoryUsedByOthers)
             {
@@ -216,7 +240,7 @@ namespace my_portfolio_api.Controllers
                 _context.SaveChanges();
             }
 
-            return NoContent();
+            return NoContent(); // Return 204 on success
         }
     }
 }
