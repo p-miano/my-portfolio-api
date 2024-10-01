@@ -24,10 +24,17 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 
-// Add Identity services
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<PortfolioContext>()
-    .AddDefaultTokenProviders();
+// Add Identity services and configure role management
+builder.Services.AddIdentity<User, IdentityRole>(options =>
+{
+    // Configure password, user, and lockout settings here
+    options.Password.RequireDigit = true;
+    options.Password.RequiredLength = 6;
+    options.User.RequireUniqueEmail = true;
+})
+.AddEntityFrameworkStores<PortfolioContext>()
+.AddDefaultTokenProviders();
+
 
 // Configure JWT authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
