@@ -1,42 +1,213 @@
+/* Root container */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Styling for the buttons in the HomePage */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the buttons horizontally */
+    gap: 1px;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.button-group button {
+    background-color: #007bff; /* Default Bootstrap primary color */
+    color: white;
+    width: 60%; /* Set buttons to 60% width */
+    max-width: 600px;
+    border-radius: 8px;
+    padding: 10px;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center; /* Ensure text is centered */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Hover effect for buttons */
+.button-group button:hover {
+    background-color: #0056b3; /* Slightly darker color */
 }
 
-.card {
-  padding: 2em;
+/* Header styles */
+h1 {
+    font-size: 3.5rem;
+    color: #212529; /* Default Bootstrap heading color */
 }
 
-.read-the-docs {
-  color: #888;
+p.lead {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #6c757d; /* Default Bootstrap muted text color */
+}
+
+/* Container to centralize the content for HomePage */
+.container-fluid {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding-top: 5px; /* Adds slight padding at the top */
+    background-color: #F9F9F9; /* Light background */
+}
+
+/* General form control styling */
+.form-control {
+    width: 100%;
+    margin: 10px auto;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+/* Styling the login container */
+.login-container {
+    width: 60%; /* Set login container width to match buttons */
+    max-width: 600px; /* Same max width as buttons */
+    margin: 30px auto 0 auto;
+    text-align: left;
+    padding: 20px;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjusting Login heading */
+.login-container h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #212529; /* Default Bootstrap heading color */
+    text-align: center;
+}
+
+/* Login form spacing */
+.login-container .form-group {
+    margin-bottom: 15px;
+}
+
+/* Login input padding */
+.login-container .form-control {
+    padding: 10px;
+}
+
+/* Login button styling */
+.login-container .btn {
+    background-color: #007bff; /* Default Bootstrap primary color */
+    color: white;
+    width: 100%; /* Full width of the form */
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.login-container .btn:hover {
+    background-color: #0056b3; /* Hover state for the button */
+}
+
+/* General styling to centralize the content */
+.text-center {
+    margin-bottom: 30px;
+}
+
+/* Prevents body scroll and ensures full-screen view */
+body {
+    margin: 0;
+    padding-top: 70px;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    height: 100%;
+}
+
+/* Styling the register container to match the login container*/ 
+.register-container {
+    width: 100%;
+    max-width: 800px;
+    margin: 30px auto;
+    text-align: left;
+    padding: 20px;
+    border: 1px solid #ddd;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjusting Register heading */
+.register-container h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #212529; /* Default Bootstrap heading color */
+    text-align: center;
+}
+
+/* Register form spacing */
+.register-container .form-group {
+    margin-bottom: 15px;
+}
+
+/* Register input padding */
+.register-container .form-control {
+    padding: 10px;
+}
+
+/* Register button styling */
+.register-container .btn {
+    background-color: #007bff; /* Default Bootstrap primary color */
+    color: white;
+    width: 100%; /* Full width of the form */
+    font-size: 1.2rem;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.register-container .btn:hover {
+    background-color: #0056b3; /* Hover state for the button */
+}
+
+/* Responsive handling */
+@media (max-width: 768px) {
+    .register-container {
+        width: 90%; /* Make sure it adapts to smaller screens */
+    }
+}
+
+.sidebar {
+    min-height: 100vh; /* Full page height */
+    border-right: 1px solid #ccc;
+}
+
+.projects-list {
+    flex-grow: 1;
+}
+
+/* Navbar styling adjustments */
+.navbar {
+    margin-bottom: 20px;
+}
+
+.navbar .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.navbar .nav-link {
+    font-size: 1.2rem;
+}
+
+.navbar .btn {
+    font-size: 1.2rem;
+    padding: 5px 15px;
 }

@@ -1,11 +1,15 @@
-import api from '../api/api';
-import { Project } from '../types/projectTypes';
+import axios from 'axios';
+import { Project, ProjectRead } from '../types/projectTypes'; // Assuming these types are defined elsewhere
 
-
-// Fetch all projects for the logged-in user
-export const getProjects = async (): Promise<Project[]> => {
+// Retrieve all projects
+export const getProjects = async (): Promise<ProjectRead[]> => {
     try {
-        const response = await api.get('/projects');
+        const token = localStorage.getItem('authToken'); // Get the token from localStorage
+        const response = await axios.get('https://localhost:7051/api/projects', {
+            headers: {
+                Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+            },
+        });
         return response.data;
     } catch (error) {
         console.error('Error fetching projects', error);
@@ -14,9 +18,14 @@ export const getProjects = async (): Promise<Project[]> => {
 };
 
 // Fetch a single project by its ID
-export const getProjectById = async (id: number): Promise<Project> => {
+export const getProjectById = async (id: number): Promise<ProjectRead> => {
     try {
-        const response = await api.get(`/projects/${id}`);
+        const token = localStorage.getItem('authToken'); // Get the token
+        const response = await axios.get(`https://localhost:7051/api/projects/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Include the token in the request
+            },
+        });
         return response.data;
     } catch (error) {
         console.error('Error fetching project', error);
@@ -27,7 +36,12 @@ export const getProjectById = async (id: number): Promise<Project> => {
 // Create a new project
 export const createProject = async (projectData: Project): Promise<Project> => {
     try {
-        const response = await api.post('/projects', projectData);
+        const token = localStorage.getItem('authToken'); // Get the token
+        const response = await axios.post('https://localhost:7051/api/projects', projectData, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Include the token in the request
+            },
+        });
         return response.data;
     } catch (error) {
         console.error('Error creating project', error);
@@ -38,7 +52,12 @@ export const createProject = async (projectData: Project): Promise<Project> => {
 // Update an existing project
 export const updateProject = async (id: number, projectData: Project): Promise<void> => {
     try {
-        await api.put(`/projects/${id}`, projectData);
+        const token = localStorage.getItem('authToken'); // Get the token
+        await axios.put(`https://localhost:7051/api/projects/${id}`, projectData, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Include the token in the request
+            },
+        });
     } catch (error) {
         console.error('Error updating project', error);
         throw error;
@@ -48,7 +67,12 @@ export const updateProject = async (id: number, projectData: Project): Promise<v
 // Delete a project
 export const deleteProject = async (id: number): Promise<void> => {
     try {
-        await api.delete(`/projects/${id}`);
+        const token = localStorage.getItem('authToken'); // Get the token
+        await axios.delete(`https://localhost:7051/api/projects/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`, // Include the token in the request
+            },
+        });
     } catch (error) {
         console.error('Error deleting project', error);
         throw error;

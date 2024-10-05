@@ -1,46 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { getProjects } from '../services/projectService';
-import { Project } from '../types/projectTypes';
+// ProjectsList.tsx
+import React, { useState, useEffect } from 'react';
+import { getProjects } from '../services/projectService'; // Import your project service
 
-const ProjectsList: React.FC = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+const ProjectsList = () => {
+    const [projects, setProjects] = useState([]);
 
-    // Fetch the projects when the component mounts
     useEffect(() => {
         const fetchProjects = async () => {
             try {
                 const data = await getProjects();
                 setProjects(data);
             } catch (error) {
-                setError('Failed to fetch projects.');
-            } finally {
-                setLoading(false);
+                console.error('Error fetching projects:', error);
             }
         };
 
         fetchProjects();
     }, []);
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (error) {
-        return <div>{error}</div>;
-    }
-
     return (
-        <div>
-            <h1>Projects List</h1>
-            <ul>
+        <div className="container mt-5">
+            <h2>Your Projects</h2>
+            <div className="row">
                 {projects.map((project) => (
-                    <li key={project.title}>
-                        <strong>{project.title}</strong> - {project.description}
-                    </li>
+                    <div key={project.id} className="col-md-4">
+                        <div className="card mb-3">
+                            <div className="card-body">
+                                <h5 className="card-title">{project.title}</h5>
+                                <p className="card-text">{project.description}</p>
+                                <a href={project.githubLink} className="btn btn-primary">GitHub</a>
+                            </div>
+                        </div>
+                    </div>
                 ))}
-            </ul>
+            </div>
         </div>
     );
 };
